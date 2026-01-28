@@ -102,13 +102,13 @@ jobs:
             echo "ERROR: No JSON payload found for recipe run."
             exit 1
           fi
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: autopkg-cache
-          path: ~/Library/AutoPkg/Cache/
-          retention-days: 1
+      # - name: Upload artifacts
+      #   uses: actions/upload-artifact@v4
+      #   if: always()
+      #   with:
+      #     name: autopkg-cache
+      #     path: ~/Library/AutoPkg/Cache/
+      #     retention-days: 1
       - name: Delete workflow logs
         if: always() && github.event_name == 'repository_dispatch'
         run: |
