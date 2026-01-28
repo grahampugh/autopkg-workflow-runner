@@ -88,15 +88,6 @@ EOF
 
 if [[ $? -eq 0 ]]; then
     echo "Dispatch payload created: $OUTPUT_FILE"
-    echo ""
-    echo "To trigger the workflow, run:"
-    echo "curl -L -X POST \\"
-    echo "  -H \"Accept: application/vnd.github+json\" \\"
-    echo "  -H \"Authorization: Bearer <YOUR_TOKEN>\" \\"
-    echo "  -H \"X-GitHub-Api-Version: 2022-11-28\" \\"
-    echo "  https://api.github.com/repos/grahampugh/autopkg-linux-runner/dispatches \\"
-    echo "  -d @$OUTPUT_FILE"
-
     if [[ "$dispatch" == "true" ]]; then
         # extract GitHub token from file
         if [[ -z "$TOKEN" ]]; then
@@ -118,6 +109,15 @@ if [[ $? -eq 0 ]]; then
             echo "ERROR: Workflow dispatch failed with code: $response_code"
             exit 1
         fi
+    else
+        echo ""
+        echo "To trigger the workflow, run:"
+        echo "curl -L -X POST \\"
+        echo "  -H \"Accept: application/vnd.github+json\" \\"
+        echo "  -H \"Authorization: Bearer <YOUR_TOKEN>\" \\"
+        echo "  -H \"X-GitHub-Api-Version: 2022-11-28\" \\"
+        echo "  https://api.github.com/repos/grahampugh/autopkg-linux-runner/dispatches \\"
+        echo "  -d @$OUTPUT_FILE"
     fi
 else
     echo "ERROR: Failed to create dispatch payload."
