@@ -44,6 +44,10 @@ do
         --dispatch)
             dispatch="true"
             ;;
+        --token)
+            shift
+            TOKEN="$1"
+            ;;
         *)
             echo "Unknown parameter: $1"
             usage
@@ -69,13 +73,6 @@ if ! jq empty "$INPUT_FILE" 2>/dev/null; then
     exit 1
 fi
 
-# extract GitHub token from file
-if token=$(jq -r .GH_TOKEN "$INPUT_FILE" 2>/dev/null); then
-    echo "GitHub Token obtained from Input File"
-else
-    echo "ERROR: no token supplied"
-fi
-
 # Base64 encode the input file
 ENCODED=$(base64 -i "$INPUT_FILE")
 
@@ -97,15 +94,20 @@ if [[ $? -eq 0 ]]; then
     echo "  -H \"Accept: application/vnd.github+json\" \\"
     echo "  -H \"Authorization: Bearer <YOUR_TOKEN>\" \\"
     echo "  -H \"X-GitHub-Api-Version: 2022-11-28\" \\"
-    echo "  https://api.github.com/repos/OWNER/REPO/dispatches \\"
+    echo "  https://api.github.com/repos/grahampugh/autopkg-linux-runner/dispatches \\"
     echo "  -d @$OUTPUT_FILE"
 
     if [[ "$dispatch" == "true" ]]; then
+        # extract GitHub token from file
+        if [[ -z "$TOKEN" ]]; then
+            echo "ERROR: no token supplied"
+        fi
+
         response_code=$(curl -s -o /dev/null -w "%{http_code}" -L -X POST \
             -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer $token" \
+            -H "Authorization: Bearer $TOKEN" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/grahampugh/REPO/dispatches \
+            https://api.github.com/repos/grahampugh/autopkg-linux-runner/dispatches \
             -d @"$OUTPUT_FILE")
         
         echo "Dispatch response code: $response_code" # DEBUG

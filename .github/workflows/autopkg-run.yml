@@ -53,7 +53,8 @@ jobs:
           chmod +x jamf-recipe-run.sh
           if [ -f /tmp/autopkg-keys.json ]; then
             # Build command with recipes and keys from JSON
-            CMD="./jamf-recipe-run.sh -vvv"
+            # should not be higher than -v in a public repo to avoid credential leaking into logs
+            CMD="./jamf-recipe-run.sh -v"
             
             # Extract and add all RECIPE_* keys as --recipe parameters
             RECIPES=$(jq -r 'to_entries | .[] | select(.key | startswith("RECIPE_")) | .value' /tmp/autopkg-keys.json)
