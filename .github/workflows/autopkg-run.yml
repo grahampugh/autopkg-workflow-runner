@@ -21,7 +21,9 @@ jobs:
       - name: Decode and save JSON payload
         if: github.event_name == 'repository_dispatch'
         run: |
-          echo "${{ github.event.client_payload.data }}" | base64 --decode > /tmp/autopkg-keys.json
+          DECODED_JSON=$(echo "${{ github.event.client_payload.data }}" | base64 --decode)
+          echo "::add-mask::$DECODED_JSON"
+          echo "$DECODED_JSON" > /tmp/autopkg-keys.json
           echo "Decoded JSON payload saved to /tmp/autopkg-keys.json"
 
       - name: Set up AutoPkg
