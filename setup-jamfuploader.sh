@@ -162,8 +162,8 @@ if [[ $GITHUB_TOKEN ]]; then
 fi
 
 # this workflow does not use overrides, so ensure untrusted recipes don't fail
-jq '.DO_NOT_FAIL_RECIPES_WITHOUT_TRUST_INFO = true' "$AUTOPKG_PREFS" > "$AUTOPKG_PREFS.tmp" && mv "$AUTOPKG_PREFS.tmp" "$AUTOPKG_PREFS"
-echo "### Wrote DO_NOT_FAIL_RECIPES_WITHOUT_TRUST_INFO true to $AUTOPKG_PREFS"
+jq '.FAIL_RECIPES_WITHOUT_TRUST_INFO = false' "$AUTOPKG_PREFS" > "$AUTOPKG_PREFS.tmp" && mv "$AUTOPKG_PREFS.tmp" "$AUTOPKG_PREFS"
+echo "### Wrote FAIL_RECIPES_WITHOUT_TRUST_INFO false to $AUTOPKG_PREFS"
 
 # add Slack credentials if anything supplied
 if [[ $SLACK_USERNAME || $SLACK_WEBHOOK ]]; then
@@ -184,7 +184,7 @@ if [[ -f "$AUTOPKG_REPO_LIST" ]]; then
     done < "$AUTOPKG_REPO_LIST"
 else
     repo_list=(
-        grahampugh/jamf-uploader
+        grahampugh/jamf-upload
         grahampugh-recipes
     )
     while read -r -d '' AUTOPKGREPO; do
