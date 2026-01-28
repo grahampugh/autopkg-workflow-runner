@@ -48,12 +48,6 @@ jobs:
             JSS_API_PW=$(jq -r '.JSS_API_PW' /tmp/autopkg-keys.json)
             GH_TOKEN=$(jq -r '.GH_TOKEN' /tmp/autopkg-keys.json)
 
-            # mask credentials
-            [[ -n "$JSS_URL" ]] && echo "::add-mask::$JSS_URL"
-            [[ -n "$JSS_API_USER" ]] && echo "::add-mask::$JSS_API_USER"
-            [[ -n "$JSS_API_PW" ]] && echo "::add-mask::$JSS_API_PW"
-            [[ -n "$GH_TOKEN" ]] && echo "::add-mask::$GH_TOKEN"
-
             # populate repo-list
             REPO_LIST=$(jq -r '.REPO_LIST' /tmp/autopkg-keys.json)
             if [[ -z $REPO_LIST ]]; then
