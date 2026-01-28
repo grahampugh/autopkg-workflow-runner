@@ -2,9 +2,11 @@ name: AutoPkg Recipe Runner
 
 on:
   workflow_dispatch: # Allows manual triggering
-  push:
-    branches:
-      - "**" # Runs on push to any branch
+  repository_dispatch:
+    types: [run-autopkg]
+  # push:
+  #   branches:
+  #     - "**" # Runs on push to any branch
   # schedule:
   #     - cron: "0 0 * * *" # Runs daily at midnight UTC (optional)
 
@@ -16,6 +18,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Decode and save JSON payload
+        if: github.event_name == 'repository_dispatch'
+        run: |
+          echo "${{ github.event.client_payload.data }}" | base64 --decode > /tmp/autopkg-keys.json
+          echo "Decoded JSON payload saved to /tmp/autopkg-keys.json"
+          cat /tmp/autopkg-keys.json
+
       - name: Set up AutoPkg
         run: |
           chmod +x setup.sh
@@ -24,16 +33,50 @@ jobs:
       - name: Set up JamfUploader
         run: |
           chmod +x setup-jamfuploader.sh
-          ./setup-jamfuploader.sh \
-            --jss-url "${{ secrets.JSS_URL }}" \
-            --jss-user "${{ secrets.JSS_API_USER }}" \
-            --jss-pass "${{ secrets.JSS_API_PW }}" \
-            --github-token "${{ secrets.GH_TOKEN }}"
-
-      - name: Run recipe list
+          if [ -f /tmp/autopkg-keys.json ]; then
+            # Extract values from JSON file
+            JSS_URL=$(jq -r '.JSS_URL' /tmp/autopkg-keys.json)
+            JSS_API_USER=$(jq -r '.JSS_API_USER' /tmp/autopkg-keys.json)
+            JSS_API_PW=$(jq -r '.JSS_API_PW' /tmp/autopkg-keys.json)
+            GH_TOKEN=$(jq -r '.GH_TOKEN' /tmp/autopkg-keys.json)
+            ./setup-jamfuploader.sh \
+              --jss-url "$JSS_URL" \
+              --jss-user "$JSS_API_USER" \
+              --jss-pass "$JSS_API_PW" \
+              --github-token "$GH_TOKEN"
+          else
+            echo "ERROR: No JSON payload found for recipe run."
+            exit 1
+          fi
+      - name: Run recipes
         run: |
           chmod +x jamf-recipe-run.sh
-          ./jamf-recipe-run.sh -vvv --recipe-list recipe-list.txt
+          if [ -f /tmp/autopkg-keys.json ]; then
+            # Build command with recipes and keys from JSON
+            CMD="./jamf-recipe-run.sh -vvv"
+            
+            # Extract and add all RECIPE_* keys as --recipe parameters
+            RECIPES=$(jq -r 'to_entries | .[] | select(.key | startswith("RECIPE_")) | .value' /tmp/autopkg-keys.json)
+            while IFS= read -r recipe; do
+              if [ -n "$recipe" ]; then
+                CMD="$CMD --recipe \"$recipe\""
+              fi
+            done <<< "$RECIPES"
+            
+            # Extract unused keys (excluding RECIPE_*, JSS_URL, JSS_API_USER, JSS_API_PW, GH_TOKEN)
+            EXTRA_KEYS=$(jq -r 'to_entries | .[] | select(.key | startswith("RECIPE_") | not) | select(.key != "JSS_URL" and .key != "JSS_API_USER" and .key != "JSS_API_PW" and .key != "GH_TOKEN") | "\(.key)=\(.value)"' /tmp/autopkg-keys.json)
+            while IFS= read -r keyvalue; do
+              if [ -n "$keyvalue" ]; then
+                CMD="$CMD --key \"$keyvalue\""
+              fi
+            done <<< "$EXTRA_KEYS"
+            
+            # Execute the command
+            eval $CMD
+          else
+            echo "ERROR: No JSON payload found for recipe run."
+            exit 1
+          fi
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
