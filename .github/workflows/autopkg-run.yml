@@ -20,11 +20,17 @@ jobs:
 
       - name: Decode and save JSON payload
         if: github.event_name == 'repository_dispatch'
-        env:
-          PAYLOAD_DATA: ${{ github.event.client_payload.data }}
         run: |
-          echo "::add-mask::$PAYLOAD_DATA"
-          echo "$PAYLOAD_DATA" | base64 --decode > /tmp/autopkg-keys.json
+          # Write payload to temp file, decode and save
+          echo '${{ github.event.client_payload.data }}' > /tmp/payload.b64
+          base64 --decode /tmp/payload.b64 > /tmp/autopkg-keys.json
+          rm /tmp/payload.b64
+
+          # Immediately mask all sensitive values
+          jq -r '.JSS_URL, .JSS_API_USER, .JSS_API_PW, .GH_TOKEN' /tmp/autopkg-keys.json | while read -r value; do
+            [[ -n "$value" && "$value" != "null" ]] && echo "::add-mask::$value"
+          done
+
           echo "Decoded JSON payload saved to /tmp/autopkg-keys.json"
 
       - name: Set up AutoPkg
