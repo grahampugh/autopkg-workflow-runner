@@ -65,6 +65,8 @@ Create an `autopkg-keys.json` file with your configuration:
 - **`JSS_API_PW`** - Password for the API user or Client ID.
 - **`GH_TOKEN`** - GitHub Personal Access Token. This is **not** the same token as the token required for deploying a dispatch. This is a generic token required to prevent oppressive rate limitation by GitHub. A Classic token with no scopes is sufficient.
 
+If the runner will only be used on one repo, the key/value pairs can also be provided as secrets, meaning they don't need to be in the JSON.
+
 #### Optional Keys
 
 - **`RECIPE_1`, `RECIPE_2`, etc.** - Recipe names to run (e.g., `AppName.jamf`, `com.github.jamf.myrecipe`, `/path/to/SomeRecipe.jamf.recipe.yaml`)

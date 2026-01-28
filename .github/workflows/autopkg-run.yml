@@ -46,32 +46,58 @@ jobs:
           ./setup.sh
 
       - name: Set up JamfUploader
+        env:
+          SECRET_JSS_URL: ${{ secrets.JSS_URL }}
+          SECRET_JSS_API_USER: ${{ secrets.JSS_API_USER }}
+          SECRET_JSS_API_PW: ${{ secrets.JSS_API_PW }}
+          SECRET_GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           chmod +x setup-jamfuploader.sh
-          if [ -f /tmp/autopkg-keys.json ]; then
+
+          # Mask secrets immediately
+          [[ -n "$SECRET_JSS_URL" ]] && echo "::add-mask::$SECRET_JSS_URL"
+          [[ -n "$SECRET_JSS_API_USER" ]] && echo "::add-mask::$SECRET_JSS_API_USER"
+          [[ -n "$SECRET_JSS_API_PW" ]] && echo "::add-mask::$SECRET_JSS_API_PW"
+          [[ -n "$SECRET_GH_TOKEN" ]] && echo "::add-mask::$SECRET_GH_TOKEN"
+
+          # Check for secrets first, fall back to JSON if not present
+          if [[ -n "$SECRET_JSS_URL" ]]; then
+            JSS_URL="$SECRET_JSS_URL"
+            JSS_API_USER="$SECRET_JSS_API_USER"
+            JSS_API_PW="$SECRET_JSS_API_PW"
+            GH_TOKEN="$SECRET_GH_TOKEN"
+            echo "Using credentials from repository secrets"
+          elif [ -f /tmp/autopkg-keys.json ]; then
             # Extract values from JSON file
             JSS_URL=$(jq -r '.JSS_URL' /tmp/autopkg-keys.json)
             JSS_API_USER=$(jq -r '.JSS_API_USER' /tmp/autopkg-keys.json)
             JSS_API_PW=$(jq -r '.JSS_API_PW' /tmp/autopkg-keys.json)
             GH_TOKEN=$(jq -r '.GH_TOKEN' /tmp/autopkg-keys.json)
-
-            # populate repo-list
-            REPO_LIST=$(jq -r '.REPO_LIST' /tmp/autopkg-keys.json)
-            if [[ -z $REPO_LIST ]]; then
-              REPO_LIST=repo-list.txt
-            fi
-
-            # run
-            ./setup-jamfuploader.sh \
-              --jss-url "$JSS_URL" \
-              --jss-user "$JSS_API_USER" \
-              --jss-pass "$JSS_API_PW" \
-              --github-token "$GH_TOKEN" \
-              --repo-list "$REPO_LIST"
+            echo "Using credentials from dispatch payload"
           else
-            echo "ERROR: No JSON payload found for recipe run."
+            echo "ERROR: No credentials found in secrets or JSON payload."
             exit 1
           fi
+
+          # Mask derived values to ensure they're protected regardless of source
+          [[ -n "$JSS_URL" ]] && echo "::add-mask::$JSS_URL"
+          [[ -n "$JSS_API_USER" ]] && echo "::add-mask::$JSS_API_USER"
+          [[ -n "$JSS_API_PW" ]] && echo "::add-mask::$JSS_API_PW"
+          [[ -n "$GH_TOKEN" ]] && echo "::add-mask::$GH_TOKEN"
+
+          # populate repo-list
+          REPO_LIST=$(jq -r '.REPO_LIST' /tmp/autopkg-keys.json 2>/dev/null)
+          if [[ -z $REPO_LIST || $REPO_LIST == "null" ]]; then
+            REPO_LIST=repo-list.txt
+          fi
+
+          # run
+          ./setup-jamfuploader.sh \
+            --jss-url "$JSS_URL" \
+            --jss-user "$JSS_API_USER" \
+            --jss-pass "$JSS_API_PW" \
+            --github-token "$GH_TOKEN" \
+            --repo-list "$REPO_LIST"
       - name: Run recipes
         run: |
           chmod +x jamf-recipe-run.sh
