@@ -23,7 +23,6 @@ jobs:
         run: |
           echo "${{ github.event.client_payload.data }}" | base64 --decode > /tmp/autopkg-keys.json
           echo "Decoded JSON payload saved to /tmp/autopkg-keys.json"
-          cat /tmp/autopkg-keys.json
 
       - name: Set up AutoPkg
         run: |
