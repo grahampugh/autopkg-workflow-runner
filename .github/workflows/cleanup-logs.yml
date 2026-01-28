@@ -1,0 +1,35 @@
+name: Cleanup Workflow Logs
+
+on:
+    workflow_run:
+        workflows: ["AutoPkg Recipe Runner"]
+        types:
+            - completed
+
+jobs:
+    delete-logs:
+        runs-on: ubuntu-latest
+        permissions:
+            actions: write
+
+        steps:
+            - name: Delete workflow logs
+              if: github.event.workflow_run.event == 'repository_dispatch'
+              run: |
+                  echo "Deleting logs for workflow run ID: ${{ github.event.workflow_run.id }}"
+
+                  # Wait a moment to ensure logs are fully written
+                  sleep 5
+
+                  # Delete the logs
+                  curl -L -X DELETE \
+                    -H "Accept: application/vnd.github+json" \
+                    -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                    -H "X-GitHub-Api-Version: 2022-11-28" \
+                    https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}/logs
+
+                  if [ $? -eq 0 ]; then
+                    echo "Successfully deleted logs for run ${{ github.event.workflow_run.id }}"
+                  else
+                    echo "Failed to delete logs (they may have already been deleted or not yet available)"
+                  fi

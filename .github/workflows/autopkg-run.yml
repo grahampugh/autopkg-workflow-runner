@@ -102,6 +102,7 @@ jobs:
             echo "ERROR: No JSON payload found for recipe run."
             exit 1
           fi
+
       # - name: Upload artifacts
       #   uses: actions/upload-artifact@v4
       #   if: always()
@@ -109,12 +110,3 @@ jobs:
       #     name: autopkg-cache
       #     path: ~/Library/AutoPkg/Cache/
       #     retention-days: 1
-      - name: Delete workflow logs
-        if: always() && github.event_name == 'repository_dispatch'
-        run: |
-          echo "Deleting workflow run logs for run ID: ${{ github.run_id }}"
-          curl -L -X DELETE \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/logs || echo "Failed to delete logs (may not exist yet)"
