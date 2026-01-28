@@ -1,0 +1,38 @@
+name: AutoPkg Recipe Runner
+
+on:
+    workflow_dispatch: # Allows manual triggering
+    push:
+        branches:
+            - "**" # Runs on push to any branch
+    # schedule:
+    #     - cron: "0 0 * * *" # Runs daily at midnight UTC (optional)
+
+jobs:
+    run-autopkg:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Set up AutoPkg
+              run: |
+                  chmod +x setup.sh
+                  ./setup.sh
+
+            - name: Add grahampugh-recipes repo
+              run: |
+                  ./../autopkg/.venv/bin/python3 ../autopkg/Code/autopkg repo-add grahampugh-recipes
+
+            - name: Run erase-install download recipe
+              run: |
+                  ./../autopkg/.venv/bin/python3 ../autopkg/Code/autopkg run -v com.github.grahampugh.recipes.download.erase-install
+
+            - name: Upload artifacts
+              uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: autopkg-cache
+                  path: ~/Library/AutoPkg/Cache/
+                  retention-days: 7
