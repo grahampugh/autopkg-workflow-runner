@@ -21,8 +21,12 @@ jobs:
       - name: Decode and save JSON payload
         if: github.event_name == 'repository_dispatch'
         run: |
-          # Write payload to temp file, decode and save
-          echo '${{ github.event.client_payload.data }}' > /tmp/payload.b64
+          # Write payload to temp file using heredoc to avoid logging
+          cat > /tmp/payload.b64 << 'PAYLOAD_EOF'
+          ${{ github.event.client_payload.data }}
+          PAYLOAD_EOF
+
+          # Decode to JSON file
           base64 --decode /tmp/payload.b64 > /tmp/autopkg-keys.json
           rm /tmp/payload.b64
 
