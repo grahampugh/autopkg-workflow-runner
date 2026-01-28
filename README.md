@@ -61,7 +61,7 @@ Create an `autopkg-keys.json` file with your configuration:
 
 - **`JSS_URL`** - Your Jamf Pro server URL (e.g., `https://company.jamfcloud.com`)
 - **`JSS_API_USER`** - API username or Client ID with whichever permissions are required to run the recipes.
-- **`JSS_API_PW`** - Password for the API user
+- **`JSS_API_PW`** - Password for the API user or Client ID.
 - **`GH_TOKEN`** - GitHub Personal Access Token. This is **not** the same token as the token required for deploying a dispatch. This is a generic token required to prevent oppressive rate limitation by GitHub. A Classic token with no scopes is sufficient.
 
 #### Optional Keys
