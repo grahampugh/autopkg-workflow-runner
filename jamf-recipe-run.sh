@@ -42,15 +42,17 @@ do
             ;;
         -r|--recipe)
             shift
+            echo "Recipe: $1"
             inputted_jamf_recipes+=("$1")
             ;;
         -l|--recipe-list)
-            # we need this so that we can run a temporary trusted recipe list 
             shift
+            echo "Recipe list: $1"
             AUTOPKG_RECIPE_LIST="$1"
             ;;
         --key)
             shift
+            echo "Extra key: $1"
             extra_key+=(
                 "--key"
                 "$1"
@@ -62,7 +64,8 @@ do
             replace_pkg=1
             ;;
         *)
-            inputted_jamf_recipes+=("$1")
+            echo "Unknown parameter: $1"
+            usage
             ;;
     esac
     shift
@@ -72,11 +75,13 @@ done
 [[ $AUTOPKG_PREFS ]] || AUTOPKG_PREFS="$HOME/.config/Autopkg/config.json"
 echo "AutoPkg prefs file: $AUTOPKG_PREFS"
 
-if [[ $AUTOPKG_RECIPE_LIST ]]; then
+if [[ -f "$AUTOPKG_RECIPE_LIST" ]]; then
     # create recipe list from file
     inputted_recipe_list=()
-    while IFS= read -r; do inputted_recipe_list+=("$REPLY"); done < "$AUTOPKG_RECIPE_LIST" 
-elif [[ "${inputted_jamf_recipes[*]}" ]]; then
+    while IFS= read -r; do 
+        inputted_recipe_list+=("$REPLY")
+    done < "$AUTOPKG_RECIPE_LIST" 
+elif [[ "${#inputted_jamf_recipes[@]}" -gt 0 ]]; then
     # get list from command line
     inputted_recipe_list=("${inputted_jamf_recipes[@]}")
 else
