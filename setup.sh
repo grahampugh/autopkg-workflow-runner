@@ -26,7 +26,7 @@ sudo python3.10 -m ensurepip --upgrade
 sudo python3.10 -m pip install --upgrade pip
 
 # update python basics
-sudo python3.10 -m pip install --upgrade setuptools wheel build
+sudo python3.10 -m pip install --upgrade setuptools wheel build Foundation
 
 # install packages needed for installing python requirements and using python processors
 sudo DEBIAN_FRONTEND=noninteractive apt install -y python-dev-is-python3 speech-dispatcher libcairo2-dev libmagic-dev jq p7zip-full msitools curl git wget build-essential libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev
