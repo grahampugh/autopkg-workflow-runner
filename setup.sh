@@ -52,8 +52,8 @@ mkdir -p ~/Library/AutoPkg
 mkdir -p ~/.config/Autopkg
 
 # if config file does not exist, create it:
-if [ ! -f  ~/.config/Autopkg/config.json ] ; then
-echo {} > ~/.config/Autopkg/config.json
+if [[ ! -f  ~/.config/Autopkg/config.json ]]; then
+    echo {} > ~/.config/Autopkg/config.json
 fi
 
 # add required recipe repos for jgstew-recipes
@@ -68,17 +68,14 @@ done < .autopkg_repos.txt
 # https://github.com/wbond/oscrypto/issues/78#issuecomment-2210120532
 ./../autopkg/.venv/bin/python3 -m pip install -I git+https://github.com/wbond/oscrypto.git
 
-# test:
-# ./../autopkg/.venv/bin/python3 ../autopkg/Code/autopkg run -v Test-Recipes/AutopkgCore.test.recipe.yaml
-# ./../autopkg/.venv/bin/python3 ../autopkg/Code/autopkg run -v com.github.jgstew.test.AutopkgBuildRecipeListTest
-
 # get autopkg version
 ./../autopkg/.venv/bin/python3 ../autopkg/Code/autopkg version
 
-# because this is relative path, it will only work within the recipe or autopkg folder:
-echo 'alias autopkg="./../autopkg/.venv/bin/python3 ../autopkg/Code/autopkg"' >> ~/.bashrc
-alias autopkg="./../autopkg/.venv/bin/python3 ../autopkg/Code/autopkg"
+# # because this is relative path, it will only work within the recipe or autopkg folder:
+# echo 'alias autopkg="./../autopkg/.venv/bin/python3 ../autopkg/Code/autopkg"' >> ~/.bashrc
+# alias autopkg="./../autopkg/.venv/bin/python3 ../autopkg/Code/autopkg"
 
 # further test: ./../autopkg/.venv/bin/python3 ../autopkg/Code/autopkg run -vv --recipe-list Test-Recipes/Test-Recipes.recipelist.txt
-echo "Setup complete. Please restart your terminal or run 'source ~/.bashrc' to use the 'autopkg' command."
+# echo "Setup complete. Please restart your terminal or run 'source ~/.bashrc' to use the 'autopkg' command."
+echo "Setup complete."
 exit 0
