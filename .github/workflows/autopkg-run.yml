@@ -24,9 +24,7 @@ jobs:
           PAYLOAD_DATA: ${{ github.event.client_payload.data }}
         run: |
           echo "::add-mask::$PAYLOAD_DATA"
-          DECODED_JSON=$(echo "$PAYLOAD_DATA" | base64 --decode)
-          echo "::add-mask::$DECODED_JSON"
-          echo "$DECODED_JSON" > /tmp/autopkg-keys.json
+          echo "$PAYLOAD_DATA" | base64 --decode > /tmp/autopkg-keys.json
           echo "Decoded JSON payload saved to /tmp/autopkg-keys.json"
 
       - name: Set up AutoPkg
