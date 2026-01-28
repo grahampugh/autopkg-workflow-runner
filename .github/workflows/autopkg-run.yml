@@ -30,7 +30,7 @@ jobs:
             --jss-pass "${{ secrets.JSS_API_PW }}" \
             --github-token "${{ secrets.GH_TOKEN }}"
 
-      - name: Run erase-install download recipe
+      - name: Run recipe list
         run: |
           chmod +x jamf-recipe-run.sh
           ./jamf-recipe-run.sh -vvv --recipe-list recipe-list.txt

@@ -1,5 +1,5 @@
-#!/bin/bash
-#
+#!/usr/bin/env bash
+
 # Run a Jamf recipe.
 # by Graham Pugh
 

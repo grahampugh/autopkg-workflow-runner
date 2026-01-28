@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # setup-jamfuploader.sh
 # by Graham Pugh
@@ -173,11 +173,6 @@ if [[ $SLACK_USERNAME || $SLACK_WEBHOOK ]]; then
     configureSlack
 fi
 
-# Add core AutoPkg repos (checks if already added)
-autopkg_run repo-add ${AUTOPKGREPOS} --prefs "$AUTOPKG_PREFS"
-
-echo "Added $AUTOPKGREPOS to the prefs file"
-
 if [[ $JSS_URL ]]; then
     # Configure JamfUploader
     configureJamfUploader
@@ -186,18 +181,21 @@ fi
 
 # Add recipe repos to the prefs.
 if [[ -f "$AUTOPKG_REPO_LIST" ]]; then
-    read -r -d '' AUTOPKGREPOS < "$AUTOPKG_REPO_LIST"
+    while read -r -d '' AUTOPKGREPO; do
+        autopkg_run repo-add "$AUTOPKGREPO" --prefs "$AUTOPKG_PREFS"
+        echo "Added $AUTOPKGREPO to the prefs file"
+    done < "$AUTOPKG_REPO_LIST"
 else
-    read -r -d '' AUTOPKGREPOS <<ENDMSG
-grahampugh/jamf-upload
-grahampugh-recipes
-ENDMSG
+    repo_list=(
+        grahampugh/jamf-uploader
+        grahampugh-recipes
+    )
+    while read -r -d '' AUTOPKGREPO; do
+        autopkg_run repo-add "$AUTOPKGREPO" --prefs "$AUTOPKG_PREFS"
+        echo "Added $AUTOPKGREPO to the prefs file"
+    done < <(printf '%s\0' "${repo_list[@]}")
+
 fi
-
-# Add core AutoPkg repos (checks if already added)
-autopkg_run repo-add ${AUTOPKGREPOS} --prefs "$AUTOPKG_PREFS"
-
-echo "Added $AUTOPKGREPOS to the prefs file"
 
 echo "### AutoPkg Repos Added"
 
