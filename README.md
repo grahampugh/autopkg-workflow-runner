@@ -30,6 +30,7 @@ To trigger dispatches, you need a Personal Access Token:
    - **Repository access**: "Only select repositories" → Select this repository
    - **Repository permissions**:
      - **Contents**: Read and write
+     - **Actions**: Read and write
 4. Click **Generate token** and save it securely
 
 **Using Classic Tokens:**
