@@ -191,7 +191,6 @@ else
         autopkg_cmd repo-add "$AUTOPKGREPO" --prefs "$AUTOPKG_PREFS"
         echo "Added $AUTOPKGREPO to the prefs file"
     done < <(printf '%s\0' "${repo_list[@]}")
-
 fi
 
 echo "### AutoPkg Repos Added"

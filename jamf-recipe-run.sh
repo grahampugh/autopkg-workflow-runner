@@ -97,6 +97,13 @@ if [[ $replace_pkg -eq 1 ]]; then
     )
 fi
 
+# GET JSS_URL from the prefs file using jq
+JSS_URL=$(jq -r '.JSS_URL' "$AUTOPKG_PREFS" 2>/dev/null)
+if [[ -z "$JSS_URL" ]]; then
+    echo "ERROR: no URL supplied"
+    exit 1
+fi
+
 # now perform the runs
 for inputted_jamf_recipe in "${inputted_recipe_list[@]}"; do
     echo "Processing recipe: '$inputted_jamf_recipe'"
