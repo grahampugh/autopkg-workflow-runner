@@ -55,12 +55,9 @@ configureSlack() {
     fi
 }
 
-autopkg_run() {
-    # Run autopkg with prefs and any extra parameters
-    local RECIPE="$1"
-    shift
-
-    ./../autopkg/.venv/bin/python3 ../autopkg/Code/autopkg run --prefs "$AUTOPKG_PREFS" "$RECIPE" "$@"
+autopkg_cmd() {
+    # Run autopkg with any extra parameters
+    ./../autopkg/.venv/bin/python3 ../autopkg/Code/autopkg "$@"
 }
 
 ## Main section
@@ -182,7 +179,7 @@ fi
 # Add recipe repos to the prefs.
 if [[ -f "$AUTOPKG_REPO_LIST" ]]; then
     while read -r -d '' AUTOPKGREPO; do
-        autopkg_run repo-add "$AUTOPKGREPO" --prefs "$AUTOPKG_PREFS"
+        autopkg_cmd repo-add "$AUTOPKGREPO" --prefs "$AUTOPKG_PREFS"
         echo "Added $AUTOPKGREPO to the prefs file"
     done < "$AUTOPKG_REPO_LIST"
 else
@@ -191,7 +188,7 @@ else
         grahampugh-recipes
     )
     while read -r -d '' AUTOPKGREPO; do
-        autopkg_run repo-add "$AUTOPKGREPO" --prefs "$AUTOPKG_PREFS"
+        autopkg_cmd repo-add "$AUTOPKGREPO" --prefs "$AUTOPKG_PREFS"
         echo "Added $AUTOPKGREPO to the prefs file"
     done < <(printf '%s\0' "${repo_list[@]}")
 
