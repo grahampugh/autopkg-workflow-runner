@@ -33,11 +33,26 @@ jobs:
           base64 --decode /tmp/payload.b64 > /tmp/autopkg-keys.json
           rm /tmp/payload.b64
 
-          # Immediately mask all sensitive values
-          jq -r 'try .JSS_URL // "", try .JSS_API_USER // "", try .JSS_API_PW // "", try .GH_TOKEN // ""' /tmp/autopkg-keys.json | while read -r value; do
-            [[ -n "$value" && "$value" != "null" ]] && echo "::add-mask::$value"
-          done
+          # Verify JSON is valid
+          echo "Verifying JSON structure..."
+          if ! jq empty /tmp/autopkg-keys.json 2>&1; then
+            echo "ERROR: Failed to parse JSON file"
+            echo "File contents (first 200 chars):"
+            head -c 200 /tmp/autopkg-keys.json || true
+            exit 1
+          fi
+          echo "JSON structure is valid"
 
+          # Immediately mask all sensitive values
+          echo "Masking sensitive values..."
+          while IFS= read -r value; do
+            if [[ -n "$value" && "$value" != "null" ]]; then
+              echo "::add-mask::$value"
+              echo "Masked a value"
+            fi
+          done < <(jq -r 'try .JSS_URL // "", try .JSS_API_USER // "", try .JSS_API_PW // "", try .GH_TOKEN // ""' /tmp/autopkg-keys.json)
+
+          echo "Masking complete"
           echo "Decoded JSON payload saved to /tmp/autopkg-keys.json"
 
       - name: Set up AutoPkg
