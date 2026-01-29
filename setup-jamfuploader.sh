@@ -179,6 +179,8 @@ fi
 # Add recipe repos to the prefs.
 if [[ -f "$AUTOPKG_REPO_LIST" ]]; then
     echo "Repo list supplied: $AUTOPKG_REPO_LIST"
+    echo "Recipes to add:"
+    cat "$AUTOPKG_REPO_LIST"
     while read -r -d '' AUTOPKGREPO; do
         autopkg_cmd repo-add "$AUTOPKGREPO" --prefs "$AUTOPKG_PREFS"
         echo "Added $AUTOPKGREPO to the prefs file"
