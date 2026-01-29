@@ -196,8 +196,11 @@ else
     )
     for AUTOPKGREPO in "${repo_list[@]}"; do
         echo "Adding repo: $AUTOPKGREPO"
-        autopkg_cmd repo-add "$AUTOPKGREPO" --prefs "$AUTOPKG_PREFS"
-        echo "Added $AUTOPKGREPO to the prefs file"
+        if autopkg_cmd repo-add "$AUTOPKGREPO" --prefs "$AUTOPKG_PREFS"; then
+            echo "Added $AUTOPKGREPO to the prefs file"
+        else
+            echo "ERROR: Failed to $AUTOPKGREPO to the prefs file"
+        fi
     done
 fi
 
