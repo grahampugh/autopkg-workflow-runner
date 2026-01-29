@@ -2,10 +2,10 @@ name: Cleanup Workflow Logs
 
 on:
   workflow_dispatch: # Allows manual triggering
-  # workflow_run:
-  #   workflows: ["AutoPkg Recipe Runner"]
-  #   types:
-  #     - completed
+  workflow_run:
+    workflows: ["AutoPkg Recipe Runner"]
+    types:
+      - completed
 
 jobs:
   delete-logs:
