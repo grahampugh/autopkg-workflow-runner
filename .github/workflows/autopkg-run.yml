@@ -34,7 +34,7 @@ jobs:
           rm /tmp/payload.b64
 
           # Immediately mask all sensitive values
-          jq -r '.JSS_URL, .JSS_API_USER, .JSS_API_PW, .GH_TOKEN' /tmp/autopkg-keys.json | while read -r value; do
+          jq -r 'try .JSS_URL // "", try .JSS_API_USER // "", try .JSS_API_PW // "", try .GH_TOKEN // ""' /tmp/autopkg-keys.json | while read -r value; do
             [[ -n "$value" && "$value" != "null" ]] && echo "::add-mask::$value"
           done
 
