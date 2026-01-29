@@ -181,7 +181,10 @@ if [[ -f "$AUTOPKG_REPO_LIST" ]]; then
     echo "Repo list supplied: $AUTOPKG_REPO_LIST"
     echo "Recipes to add:"
     cat "$AUTOPKG_REPO_LIST"
-    while read -r -d '' AUTOPKGREPO; do
+    while IFS= read -r AUTOPKGREPO; do
+        # Skip empty lines and comments
+        [[ -z "$AUTOPKGREPO" || "$AUTOPKGREPO" =~ ^[[:space:]]*# ]] && continue
+        echo "Adding repo: $AUTOPKGREPO"
         autopkg_cmd repo-add "$AUTOPKGREPO" --prefs "$AUTOPKG_PREFS"
         echo "Added $AUTOPKGREPO to the prefs file"
     done < "$AUTOPKG_REPO_LIST"
@@ -191,10 +194,11 @@ else
         grahampugh/jamf-upload
         grahampugh-recipes
     )
-    while read -r -d '' AUTOPKGREPO; do
+    for AUTOPKGREPO in "${repo_list[@]}"; do
+        echo "Adding repo: $AUTOPKGREPO"
         autopkg_cmd repo-add "$AUTOPKGREPO" --prefs "$AUTOPKG_PREFS"
         echo "Added $AUTOPKGREPO to the prefs file"
-    done < <(printf '%s\0' "${repo_list[@]}")
+    done
 fi
 
 echo "### AutoPkg Repos Added"
