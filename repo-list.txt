@@ -1,3 +1,2 @@
 grahampugh/jamf-upload
 grahampugh-recipes
-jamf/msp-internal-recipes
