@@ -1,35 +1,46 @@
 #!/usr/bin/env bash
 
-# Script to set up AutoPkg on a Debian-based system
+# Script to set up AutoPkg on a Debian-based system or a Mac runner
 # Based on https://github.com/jgstew/jgstew-recipes/blob/main/setup_ubuntu.sh
 
-if [ ${EUID:-0} -ne 0 ] || [ "$(id -u)" -ne 0 ]; then
-    echo ""
+# check if the platform is ARM Mac or Ubuntu
+if [[ "$(uname)" == "Darwin" ]]; then
+    echo "Running on macOS - skipping Ubuntu-specific setup"
+    PLATFORM="macOS"
 else
-    # if already root and no sudo available like in docker:
-    alias sudo="" && shopt -s expand_aliases
+    echo "Running on Linux - performing Ubuntu setup"
+    PLATFORM="Linux"
 fi
 
-sudo apt update && DEBIAN_FRONTEND=noninteractive apt install -y git
-# git clone https://github.com/jgstew/jgstew-recipes.git
+if [[ "$PLATFORM" == "Linux" ]]; then
+    if [ ${EUID:-0} -ne 0 ] || [ "$(id -u)" -ne 0 ]; then
+        echo ""
+    else
+        # if already root and no sudo available like in docker:
+        sudo() { "$@"; }
+    fi
 
-# setup python3.10: https://gist.github.com/rutcreate/c0041e842f858ceb455b748809763ddb
-sudo DEBIAN_FRONTEND=noninteractive apt install -y software-properties-common git
-sudo add-apt-repository ppa:deadsnakes/ppa -y && apt update
+    sudo apt update && DEBIAN_FRONTEND=noninteractive apt install -y git
+    # git clone https://github.com/jgstew/jgstew-recipes.git
 
-sudo DEBIAN_FRONTEND=noninteractive apt install -y python3.10 python3.10-venv python3.10-dev
+    # setup python3.10: https://gist.github.com/rutcreate/c0041e842f858ceb455b748809763ddb
+    sudo DEBIAN_FRONTEND=noninteractive apt install -y software-properties-common git
+    sudo add-apt-repository ppa:deadsnakes/ppa -y && apt update
 
-# https://pip.pypa.io/en/stable/installation/#ensurepip
-sudo python3.10 -m ensurepip --upgrade
+    sudo DEBIAN_FRONTEND=noninteractive apt install -y python3.10 python3.10-venv python3.10-dev
 
-# update python pip
-sudo python3.10 -m pip install --upgrade pip
+    # https://pip.pypa.io/en/stable/installation/#ensurepip
+    sudo python3.10 -m ensurepip --upgrade
 
-# update python basics
-sudo python3.10 -m pip install --upgrade setuptools wheel build Foundation
+    # update python pip
+    sudo python3.10 -m pip install --upgrade pip
 
-# install packages needed for installing python requirements and using python processors
-sudo DEBIAN_FRONTEND=noninteractive apt install -y python-dev-is-python3 speech-dispatcher libcairo2-dev libmagic-dev jq p7zip-full msitools curl git wget build-essential libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev
+    # update python basics
+    sudo python3.10 -m pip install --upgrade setuptools wheel build Foundation
+
+    # install packages needed for installing python requirements and using python processors
+    sudo DEBIAN_FRONTEND=noninteractive apt install -y python-dev-is-python3 speech-dispatcher libcairo2-dev libmagic-dev jq p7zip-full msitools curl git wget build-essential libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev
+fi
 
 # if autopkg does not exist
 if [ ! -f  ../autopkg ] ; then

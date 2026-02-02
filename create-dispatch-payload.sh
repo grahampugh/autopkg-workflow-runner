@@ -48,6 +48,10 @@ do
             shift
             TOKEN="$1"
             ;;
+        --platform|--runner)
+            shift
+            PLATFORM="$1"
+            ;;
         *)
             echo "Unknown parameter: $1"
             usage
@@ -73,6 +77,11 @@ if ! jq empty "$INPUT_FILE" 2>/dev/null; then
     exit 1
 fi
 
+# Validate platform
+if [[ "$PLATFORM" != "ubuntu-latest" && "$PLATFORM" != "macos-latest" ]]; then
+    PLATFORM="ubuntu-latest"
+fi
+
 # Base64 encode the input file
 ENCODED=$(base64 -i "$INPUT_FILE")
 
@@ -81,6 +90,7 @@ cat > "$OUTPUT_FILE" <<EOF
 {
   "event_type": "$EVENT_TYPE",
   "client_payload": {
+    "runner": "$PLATFORM",
     "data": "$ENCODED"
   }
 }
