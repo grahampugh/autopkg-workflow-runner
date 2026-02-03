@@ -38,7 +38,7 @@ To trigger dispatches, you need a Personal Access Token:
 1. Go to **GitHub.com** → **Settings** → **Developer settings** → **Personal access tokens** → **Tokens (classic)**
 2. Click **Generate new token (classic)**
 3. Select scopes:
-   - ✅ `repo` (Full control of private repositories)
+   - `repo` (Full control of private repositories)
 4. Generate and save the token securely
 
 ### 3. Prepare Your Configuration
