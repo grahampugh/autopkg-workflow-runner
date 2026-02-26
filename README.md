@@ -1,6 +1,6 @@
-# autopkg-linux-runner
+# autopkg-workflow-runner
 
-A proof-of-concept AutoPkg runner that executes on Linux via GitHub Actions. This is designed for AutoPkg recipes that don't require macOS, such as certain recipes using JamfUploader processors.
+A proof-of-concept AutoPkg runner that executes on Linux or Mac via GitHub Actions. This is designed to allow running AutoPkg recipes on Linux that don't require macOS, such as certain recipes using JamfUploader processors, while remaining able to spin up a macOS system when required.
 
 ## Overview
 
@@ -38,7 +38,7 @@ To trigger dispatches, you need a Personal Access Token:
 1. Go to **GitHub.com** → **Settings** → **Developer settings** → **Personal access tokens** → **Tokens (classic)**
 2. Click **Generate new token (classic)**
 3. Select scopes:
-   - ✅ `repo` (Full control of private repositories)
+   - `repo` (Full control of private repositories)
 4. Generate and save the token securely
 
 ### 3. Prepare Your Configuration
@@ -95,6 +95,32 @@ This creates a `dispatch-payload.json` file ready to POST to GitHub:
 }
 ```
 
+#### Specifying the workflow platform
+
+By default, the workflow will run with an `ubuntu-latest` runner. If the recipe(s) being run require macOS, specify the platform when creating the dispatch file. This is done with the `--platform` parameter. Currently, the only valid values for the platform parameter are:
+
+- **ubuntu-latest**
+- **macos-latest**
+
+When you specify the platform, it is added to the dispatch file as follows:
+
+```bash
+./create-dispatch-payload.sh --input autopkg-keys.json --output dispatch-payload.json --platform macos-latest
+```
+
+This creates a `dispatch-payload.json` file ready to POST to GitHub:
+
+```json
+{
+  "event_type": "run-autopkg",
+  "client_payload": {
+    "runner": "macos-latest",
+    "data": "eyJKU1NfVVJMIjogImh0dHBzOi8veW91ci5qYW1mLmluc3RhbmNlLmNvbSIsIC4uLn0="
+  }
+}
+```
+
+
 ### 5. Trigger the Workflow
 
 Run the same file with the `--dispatch` option, also supplying your Personal Access Token:
@@ -102,6 +128,8 @@ Run the same file with the `--dispatch` option, also supplying your Personal Acc
 ```bash
 ./create-dispatch-payload.sh --input autopkg-keys.json --output dispatch-payload.json --dispatch --token github_pat_1122334455667788990
 ```
+
+Remember to specify the platform if not `ubuntu-latest`.
 
 **Response Codes:**
 
