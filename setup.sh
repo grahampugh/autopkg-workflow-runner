@@ -45,22 +45,6 @@ setup_ubuntu() {
     # install autopkg requirements
     ./../autopkg/.venv/bin/python3 -m pip install --requirement ../autopkg/gh_actions_requirements.txt
 
-    # create folder for autopkg recipe map
-    mkdir -p ~/Library/AutoPkg
-
-    # create folder for autopkg config
-    mkdir -p ~/.config/Autopkg
-
-    # if config file does not exist, create it:
-    if [[ ! -f ~/.config/Autopkg/config.json ]]; then
-        echo {} >~/.config/Autopkg/config.json
-    fi
-
-    # add required recipe repos for jgstew-recipes
-    while IFS= read -r line; do
-        ./../autopkg/.venv/bin/python3 ../autopkg/Code/autopkg repo-add "$line"
-    done <.autopkg_repos.txt
-
     # install jgstew-recipes requirements:
     ./../autopkg/.venv/bin/python3 -m pip install --requirement requirements.txt
 
@@ -68,8 +52,6 @@ setup_ubuntu() {
     # https://github.com/wbond/oscrypto/issues/78#issuecomment-2210120532
     ./../autopkg/.venv/bin/python3 -m pip install -I git+https://github.com/wbond/oscrypto.git
 
-    # get autopkg version
-    ./../autopkg/.venv/bin/python3 ../autopkg/Code/autopkg version
 }
 
 setup_mac() {
@@ -80,18 +62,8 @@ setup_mac() {
     # Inputs: 1. $USERHOME
     echo "### Downloading AutoPkg installer package..."
     echo
-    if [[ $use_beta == "yes" ]]; then
-        tag="tags/v3.0.0RC2"
-    else
-        tag="latest"
-    fi
-    if [[ $GITHUB_TOKEN ]]; then
-        # Use the GitHub token if provided
-        AUTOPKG_PKG=$(curl -sL -H "Accept: application/json" -H "Authorization: Bearer ${GITHUB_TOKEN}" "https://api.github.com/repos/autopkg/autopkg/releases/$tag" | awk -F '"' '/browser_download_url/ { print $4; exit }')
-    else
-        # Use the public API if no token is provided
-        AUTOPKG_PKG=$(curl -sL -H "Accept: application/json" "https://api.github.com/repos/autopkg/autopkg/releases/latest" | awk -F '"' '/browser_download_url/ { print $4; exit }')
-    fi
+    # Use the public API if no token is provided
+    AUTOPKG_PKG=$(curl -sL -H "Accept: application/json" "https://api.github.com/repos/autopkg/autopkg/releases/latest" | awk -F '"' '/browser_download_url/ { print $4; exit }')
 
     if ! /usr/bin/curl -L "${AUTOPKG_PKG}" -o "/tmp/autopkg-latest.pkg"; then
         echo "### ERROR: could not obtain AutoPkg installer package..."
@@ -114,7 +86,16 @@ setup_mac() {
     fi
 
     echo "AutoPkg $autopkg_version Installed"
+}
 
+autopkg_cmd() {
+    # Run autopkg with any extra parameters
+    # check if the platform is ARM Mac or Ubuntu
+    if [[ "$(uname)" == "Darwin" ]]; then
+        autopkg "$@"
+    else
+        ./../autopkg/.venv/bin/python3 ../autopkg/Code/autopkg "$@"
+    fi
 }
 
 ## MAIN SETUP
@@ -133,6 +114,25 @@ if [[ "$(uname)" == "Darwin" ]]; then
 else
     setup_ubuntu
 fi
+
+# create folder for autopkg recipe map
+mkdir -p ~/Library/AutoPkg
+
+# create folder for autopkg config
+mkdir -p ~/.config/Autopkg
+
+# if config file does not exist, create it:
+if [[ ! -f ~/.config/Autopkg/config.json ]]; then
+    echo {} >~/.config/Autopkg/config.json
+fi
+
+# add required recipe repos for jgstew-recipes
+while IFS= read -r line; do
+    autopkg_cmd repo-add "$line"
+done <.autopkg_repos.txt
+
+# get autopkg version
+autopkg_cmd version
 
 echo "Setup complete."
 exit 0
