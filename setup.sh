@@ -105,7 +105,7 @@ setup_mac() {
         exit 1
     fi
 
-    autopkg_version=$(${AUTOPKG} version)
+    autopkg_version=$(autopkg version)
 
     if [[ -z "$autopkg_version" ]]; then
         echo "### ERROR: could not determine AutoPkg version after installation..."
