@@ -39,7 +39,7 @@ jobs:
           PAYLOAD_EOF
 
           # Decode to JSON file
-          base64 --decode /tmp/payload.b64 > /tmp/autopkg-keys.json
+          base64 --decode --input /tmp/payload.b64 --output /tmp/autopkg-keys.json
           rm /tmp/payload.b64
 
           # Verify JSON is valid
