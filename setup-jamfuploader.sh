@@ -13,11 +13,11 @@
 
 configureJamfUploader() {
     # configure JamfUploader
-    jq --arg jss_url "$JSS_URL" '.JSS_URL = $jss_url' "$AUTOPKG_PREFS" > "$AUTOPKG_PREFS.tmp" && mv "$AUTOPKG_PREFS.tmp" "$AUTOPKG_PREFS"
+    jq --arg jss_url "$JSS_URL" '.JSS_URL = $jss_url' "$AUTOPKG_PREFS" >"$AUTOPKG_PREFS.tmp" && mv "$AUTOPKG_PREFS.tmp" "$AUTOPKG_PREFS"
 
     # get API user
     if [[ "${JSS_API_USER}" ]]; then
-        jq --arg api_user "$JSS_API_USER" '.API_USERNAME = $api_user' "$AUTOPKG_PREFS" > "$AUTOPKG_PREFS.tmp" && mv "$AUTOPKG_PREFS.tmp" "$AUTOPKG_PREFS"
+        jq --arg api_user "$JSS_API_USER" '.API_USERNAME = $api_user' "$AUTOPKG_PREFS" >"$AUTOPKG_PREFS.tmp" && mv "$AUTOPKG_PREFS.tmp" "$AUTOPKG_PREFS"
     else
         echo "ERROR: JSS_API_USER is required to configure JamfUploader."
         exit 1
@@ -25,7 +25,7 @@ configureJamfUploader() {
 
     # get API user's password
     if [[ "${JSS_API_PW}" ]]; then
-        jq --arg api_pw "$JSS_API_PW" '.API_PASSWORD = $api_pw' "$AUTOPKG_PREFS" > "$AUTOPKG_PREFS.tmp" && mv "$AUTOPKG_PREFS.tmp" "$AUTOPKG_PREFS"
+        jq --arg api_pw "$JSS_API_PW" '.API_PASSWORD = $api_pw' "$AUTOPKG_PREFS" >"$AUTOPKG_PREFS.tmp" && mv "$AUTOPKG_PREFS.tmp" "$AUTOPKG_PREFS"
     else
         echo "ERROR: JSS_API_PW is required to configure JamfUploader."
         exit 1
@@ -33,31 +33,36 @@ configureJamfUploader() {
 
     # JamfUploader requires simple keys for the repo if not using a cloud distribution point
     if [[ "${SMB_URL}" ]]; then
-        jq --arg smb_url "$SMB_URL" '.SMB_URL = $smb_url' "$AUTOPKG_PREFS" > "$AUTOPKG_PREFS.tmp" && mv "$AUTOPKG_PREFS.tmp" "$AUTOPKG_PREFS"
+        jq --arg smb_url "$SMB_URL" '.SMB_URL = $smb_url' "$AUTOPKG_PREFS" >"$AUTOPKG_PREFS.tmp" && mv "$AUTOPKG_PREFS.tmp" "$AUTOPKG_PREFS"
     fi
     if [[ "${SMB_USERNAME}" ]]; then
-        jq --arg smb_user "$SMB_USERNAME" '.SMB_USERNAME = $smb_user' "$AUTOPKG_PREFS" > "$AUTOPKG_PREFS.tmp" && mv "$AUTOPKG_PREFS.tmp" "$AUTOPKG_PREFS"
+        jq --arg smb_user "$SMB_USERNAME" '.SMB_USERNAME = $smb_user' "$AUTOPKG_PREFS" >"$AUTOPKG_PREFS.tmp" && mv "$AUTOPKG_PREFS.tmp" "$AUTOPKG_PREFS"
     fi
     if [[ "${SMB_PASSWORD}" ]]; then
-        jq --arg smb_pw "$SMB_PASSWORD" '.SMB_PASSWORD = $smb_pw' "$AUTOPKG_PREFS" > "$AUTOPKG_PREFS.tmp" && mv "$AUTOPKG_PREFS.tmp" "$AUTOPKG_PREFS"
+        jq --arg smb_pw "$SMB_PASSWORD" '.SMB_PASSWORD = $smb_pw' "$AUTOPKG_PREFS" >"$AUTOPKG_PREFS.tmp" && mv "$AUTOPKG_PREFS.tmp" "$AUTOPKG_PREFS"
     fi
 }
 
 configureSlack() {
     # get Slack user and webhook
     if [[ "${SLACK_USERNAME}" ]]; then
-        jq --arg slack_user "$SLACK_USERNAME" '.SLACK_USERNAME = $slack_user' "$AUTOPKG_PREFS" > "$AUTOPKG_PREFS.tmp" && mv "$AUTOPKG_PREFS.tmp" "$AUTOPKG_PREFS"
+        jq --arg slack_user "$SLACK_USERNAME" '.SLACK_USERNAME = $slack_user' "$AUTOPKG_PREFS" >"$AUTOPKG_PREFS.tmp" && mv "$AUTOPKG_PREFS.tmp" "$AUTOPKG_PREFS"
         echo "### Wrote SLACK_USERNAME $SLACK_USERNAME to $AUTOPKG_PREFS"
     fi
     if [[ "${SLACK_WEBHOOK}" ]]; then
-        jq --arg slack_webhook "$SLACK_WEBHOOK" '.SLACK_WEBHOOK = $slack_webhook' "$AUTOPKG_PREFS" > "$AUTOPKG_PREFS.tmp" && mv "$AUTOPKG_PREFS.tmp" "$AUTOPKG_PREFS"
+        jq --arg slack_webhook "$SLACK_WEBHOOK" '.SLACK_WEBHOOK = $slack_webhook' "$AUTOPKG_PREFS" >"$AUTOPKG_PREFS.tmp" && mv "$AUTOPKG_PREFS.tmp" "$AUTOPKG_PREFS"
         echo "### Wrote SLACK_WEBHOOK $SLACK_WEBHOOK to $AUTOPKG_PREFS"
     fi
 }
 
 autopkg_cmd() {
     # Run autopkg with any extra parameters
-    ./../autopkg/.venv/bin/python3 ../autopkg/Code/autopkg "$@"
+    # check if the platform is ARM Mac or Ubuntu
+    if [[ "$(uname)" == "Darwin" ]]; then
+        autopkg "$@"
+    else
+        ./../autopkg/.venv/bin/python3 ../autopkg/Code/autopkg "$@"
+    fi
 }
 
 ## Main section
@@ -66,55 +71,54 @@ autopkg_cmd() {
 AUTOPKG_RECIPE_LISTS=()
 
 # get arguments
-while test $# -gt 0
-do
+while test $# -gt 0; do
     case "$1" in
-        --github-token)
-            shift
-            GITHUB_TOKEN="$1"
+    --github-token)
+        shift
+        GITHUB_TOKEN="$1"
         ;;
-        --recipe-list)
-            shift
-            AUTOPKG_RECIPE_LISTS+=("$1")
+    --recipe-list)
+        shift
+        AUTOPKG_RECIPE_LISTS+=("$1")
         ;;
-        --repo-list)
-            shift
-            AUTOPKG_REPO_LIST="$1"
+    --repo-list)
+        shift
+        AUTOPKG_REPO_LIST="$1"
         ;;
-        --smb-url)
-            shift
-            SMB_URL="$1"
+    --smb-url)
+        shift
+        SMB_URL="$1"
         ;;
-        --smb-user)
-            shift
-            SMB_USERNAME="$1"
+    --smb-user)
+        shift
+        SMB_USERNAME="$1"
         ;;
-        --smb-pass)
-            shift
-            SMB_PASSWORD="$1"
+    --smb-pass)
+        shift
+        SMB_PASSWORD="$1"
         ;;
-        --jss-url)
-            shift
-            JSS_URL="$1"
+    --jss-url)
+        shift
+        JSS_URL="$1"
         ;;
-        --jss-user)
-            shift
-            JSS_API_USER="$1"
+    --jss-user)
+        shift
+        JSS_API_USER="$1"
         ;;
-        --jss-pass)
-            shift
-            JSS_API_PW="$1"
+    --jss-pass)
+        shift
+        JSS_API_PW="$1"
         ;;
-        --slack-webhook)
-            shift
-            SLACK_WEBHOOK="$1"
+    --slack-webhook)
+        shift
+        SLACK_WEBHOOK="$1"
         ;;
-        --slack-user)
-            shift
-            SLACK_USERNAME="$1"
+    --slack-user)
+        shift
+        SLACK_USERNAME="$1"
         ;;
-        *)
-            echo "
+    *)
+        echo "
 Usage:
 ./setup-jamfuploader.sh                           
 
@@ -142,7 +146,7 @@ Slack settings:
 --slack-user *          A display name for the Slack notifications
 
 "
-            exit 0
+        exit 0
         ;;
     esac
     shift
@@ -152,17 +156,17 @@ done
 AUTOPKG_PREFS="$HOME/.config/Autopkg/config.json"
 
 # add the GIT path to the prefs
-jq --arg git_path "$(which git)" '.GIT_PATH = $git_path' "$AUTOPKG_PREFS" > "$AUTOPKG_PREFS.tmp" && mv "$AUTOPKG_PREFS.tmp" "$AUTOPKG_PREFS"
+jq --arg git_path "$(which git)" '.GIT_PATH = $git_path' "$AUTOPKG_PREFS" >"$AUTOPKG_PREFS.tmp" && mv "$AUTOPKG_PREFS.tmp" "$AUTOPKG_PREFS"
 echo "### Wrote GIT_PATH $(which git) to $AUTOPKG_PREFS"
 
 # add the GitHub token to the prefs
 if [[ $GITHUB_TOKEN ]]; then
-    jq --arg github_token "$GITHUB_TOKEN" '.GITHUB_TOKEN = $github_token' "$AUTOPKG_PREFS" > "$AUTOPKG_PREFS.tmp" && mv "$AUTOPKG_PREFS.tmp" "$AUTOPKG_PREFS"
+    jq --arg github_token "$GITHUB_TOKEN" '.GITHUB_TOKEN = $github_token' "$AUTOPKG_PREFS" >"$AUTOPKG_PREFS.tmp" && mv "$AUTOPKG_PREFS.tmp" "$AUTOPKG_PREFS"
     echo "### Wrote GITHUB_TOKEN to $AUTOPKG_PREFS"
 fi
 
 # this workflow does not use overrides, so ensure untrusted recipes don't fail
-jq '.FAIL_RECIPES_WITHOUT_TRUST_INFO = false' "$AUTOPKG_PREFS" > "$AUTOPKG_PREFS.tmp" && mv "$AUTOPKG_PREFS.tmp" "$AUTOPKG_PREFS"
+jq '.FAIL_RECIPES_WITHOUT_TRUST_INFO = false' "$AUTOPKG_PREFS" >"$AUTOPKG_PREFS.tmp" && mv "$AUTOPKG_PREFS.tmp" "$AUTOPKG_PREFS"
 echo "### Wrote FAIL_RECIPES_WITHOUT_TRUST_INFO false to $AUTOPKG_PREFS"
 
 # add Slack credentials if anything supplied
@@ -187,7 +191,7 @@ if [[ -f "$AUTOPKG_REPO_LIST" ]]; then
         echo "Adding repo: $AUTOPKGREPO"
         autopkg_cmd repo-add "$AUTOPKGREPO" --prefs "$AUTOPKG_PREFS"
         echo "Added $AUTOPKGREPO to the prefs file"
-    done < "$AUTOPKG_REPO_LIST"
+    done <"$AUTOPKG_REPO_LIST"
 else
     echo "Repo list not supplied, building default list..."
     repo_list=(
@@ -205,4 +209,3 @@ else
 fi
 
 echo "### AutoPkg Repos Added"
-
