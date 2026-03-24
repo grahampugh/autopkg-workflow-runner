@@ -11,6 +11,10 @@ on:
         options:
           - ubuntu-latest
           - macos-latest
+      data:
+        description: "Base64-encoded JSON payload (optional)"
+        required: false
+        type: string
   repository_dispatch:
     types: [run-autopkg]
   # push:
@@ -30,12 +34,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install uv on Ubuntu
+        if: runner.os == 'Linux'
+        uses: astral-sh/setup-uv@v7
+
       - name: Decode and save JSON payload
-        if: github.event_name == 'repository_dispatch'
+        if: github.event.client_payload.data != '' || inputs.data != ''
         run: |
+          # Determine data source (repository_dispatch or workflow_dispatch)
+          if [[ -n "${{ github.event.client_payload.data }}" ]]; then
+            PAYLOAD_DATA="${{ github.event.client_payload.data }}"
+            echo "Using repository_dispatch payload"
+          else
+            PAYLOAD_DATA="${{ inputs.data }}"
+            echo "Using workflow_dispatch payload"
+          fi
+
           # Write payload to temp file using heredoc to avoid logging
           cat > /tmp/payload.b64 << 'PAYLOAD_EOF'
-          ${{ github.event.client_payload.data }}
+          $PAYLOAD_DATA
           PAYLOAD_EOF
 
           # Decode to JSON file
