@@ -1,0 +1,7 @@
+{
+  "event_type": "run-autopkg",
+  "client_payload": {
+    "runner": "ubuntu-latest",
+    "data": "ewogICAgIlJFQ0lQRV8xIjogImNvbS5naXRodWIuZ3JhaGFtcHVnaC5yZWNpcGVzLmphbWYuTUFVLXByb2ZpbGUiCn0K"
+  }
+}

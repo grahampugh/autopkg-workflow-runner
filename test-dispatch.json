@@ -1,0 +1,7 @@
+{
+  "event_type": "run-autopkg",
+  "client_payload": {
+    "runner": "macos-latest",
+    "data": "ewogICAgIlJFQ0lQRV8xIjogImNvbS5naXRodWIuYXV0b3BrZy5ncmFoYW1wdWdoLXJlY2lwZXMuamFtZi5GaXJlZm94Igp9"
+  }
+}

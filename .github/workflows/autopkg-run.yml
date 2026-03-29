@@ -105,14 +105,8 @@ jobs:
             echo "Using workflow_dispatch payload"
           fi
 
-          # Write payload to temp file using heredoc to avoid logging
-          cat > /tmp/payload.b64 << 'PAYLOAD_EOF'
-          $PAYLOAD_DATA
-          PAYLOAD_EOF
-
           # Decode to JSON file (using stdin/stdout for compatibility)
-          base64 --decode < /tmp/payload.b64 > /tmp/autopkg-keys.json
-          rm /tmp/payload.b64
+          echo "$PAYLOAD_DATA" | base64 --decode > /tmp/autopkg-keys.json
 
           # Verify JSON is valid
           echo "Verifying JSON structure..."
