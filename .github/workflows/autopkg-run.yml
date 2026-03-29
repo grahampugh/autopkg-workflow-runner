@@ -183,13 +183,19 @@ jobs:
           fi
           echo "Repo list used: $REPO_LIST"
 
-          # run
-          ./setup-jamfuploader.sh \
+          # run with error handling
+          echo "Running setup-jamfuploader.sh..."
+          if ./setup-jamfuploader.sh \
             --jss-url "$JSS_URL" \
             --jss-user "$JSS_API_USER" \
             --jss-pass "$JSS_API_PW" \
             --github-token "$GH_TOKEN" \
-            --repo-list "$REPO_LIST"
+            --repo-list "$REPO_LIST"; then
+            echo "JamfUploader setup completed successfully"
+          else
+            echo "ERROR: setup-jamfuploader.sh failed with exit code $?"
+            exit 1
+          fi
       - name: Run recipes
         run: |
           chmod +x jamf-recipe-run.sh
