@@ -81,10 +81,10 @@ If the runner will only be used on one repo, the key/value pairs can also be pro
 Use the included script to base64-encode your configuration:
 
 ```bash
-./create-dispatch-payload.sh --input autopkg-keys.json --output dispatch-payload.json
+./create-dispatch-payload.sh --input autopkg-keys.json --output autopkg-keys-dispatch.json
 ```
 
-This creates a `dispatch-payload.json` file ready to POST to GitHub:
+This creates a `autopkg-keys-dispatch.json` file ready to POST to GitHub:
 
 ```json
 {
@@ -133,6 +133,7 @@ Remember to specify the platform if not `ubuntu-latest`.
 **Response Codes:**
 
 - `204 No Content` - Success! Workflow triggered
+- `401 Bad credentials` - Incorrect credentials
 - `404 Not Found` - Token lacks permissions or repo not found
 - `422 Unprocessable Entity` - Invalid payload format
 

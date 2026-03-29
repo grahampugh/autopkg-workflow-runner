@@ -177,9 +177,10 @@ jobs:
           [[ -n "$GH_TOKEN" ]] && echo "::add-mask::$GH_TOKEN"
 
           # populate repo-list
-          REPO_LIST=$(jq -r '.REPO_LIST' /tmp/autopkg-keys.json 2>/dev/null)
-          if [[ -z $REPO_LIST || $REPO_LIST == "null" ]]; then
-            REPO_LIST=repo-list.txt
+          if [ -f /tmp/autopkg-keys.json ]; then
+            REPO_LIST=$(jq -r '.REPO_LIST // "repo-list.txt"' /tmp/autopkg-keys.json)
+          else
+            REPO_LIST="repo-list.txt"
           fi
           echo "Repo list used: $REPO_LIST"
 

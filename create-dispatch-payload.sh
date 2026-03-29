@@ -15,6 +15,8 @@ Options:
   --branch       Branch to run workflow on (triggers workflow_dispatch instead of repository_dispatch)
   --workflow     Workflow file name (required with --branch, e.g., autopkg-run.yml)
   --dispatch     Perform the dispatch
+    --token        GitHub token with repo permissions (required with --dispatch)
+    --platform, --runner   Runner platform (ubuntu-latest or macos-latest, default: ubuntu-latest)
   --help, -h     Show this help message
 "
     exit 0
@@ -161,7 +163,7 @@ if [[ $? -eq 0 ]]; then
         fi
     else
         echo ""
-        echo "To trigger the workflow, run:"
+        echo "To trigger the workflow run the command again with --dispatch --token <YOUR_TOKEN>, or run:"
         if [[ -n "$BRANCH" ]]; then
             echo "curl -L -X POST \\"
             echo "  -H \"Accept: application/vnd.github+json\" \\"
