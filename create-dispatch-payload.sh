@@ -136,11 +136,11 @@ if [[ $? -eq 0 ]]; then
         # Use different endpoint based on dispatch type
         if [[ -n "$BRANCH" ]]; then
             # workflow_dispatch endpoint
-            API_URL="https://api.github.com/repos/jamf/msp-services-autopkg-runner/actions/workflows/$WORKFLOW/dispatches"
+            API_URL="https://api.github.com/repos/grahampugh/autopkg-workflow-runner/actions/workflows/$WORKFLOW/dispatches"
             DISPATCH_TYPE="workflow_dispatch"
         else
             # repository_dispatch endpoint
-            API_URL="https://api.github.com/repos/jamf/msp-services-autopkg-runner/dispatches"
+            API_URL="https://api.github.com/repos/grahampugh/autopkg-workflow-runner/dispatches"
             DISPATCH_TYPE="repository_dispatch"
         fi
 
@@ -167,14 +167,14 @@ if [[ $? -eq 0 ]]; then
             echo "  -H \"Accept: application/vnd.github+json\" \\"
             echo "  -H \"Authorization: Bearer <YOUR_TOKEN>\" \\"
             echo "  -H \"X-GitHub-Api-Version: 2022-11-28\" \\"
-            echo "  https://api.github.com/repos/jamf/msp-services-autopkg-runner/actions/workflows/$WORKFLOW/dispatches \\"
+            echo "  https://api.github.com/repos/grahampugh/autopkg-workflow-runner/actions/workflows/$WORKFLOW/dispatches \\"
             echo "  -d @$OUTPUT_FILE"
         else
             echo "curl -L -X POST \\"
             echo "  -H \"Accept: application/vnd.github+json\" \\"
             echo "  -H \"Authorization: Bearer <YOUR_TOKEN>\" \\"
             echo "  -H \"X-GitHub-Api-Version: 2022-11-28\" \\"
-            echo "  https://api.github.com/repos/jamf/msp-services-autopkg-runner/dispatches \\"
+            echo "  https://api.github.com/repos/grahampugh/autopkg-workflow-runner/dispatches \\"
             echo "  -d @$OUTPUT_FILE"
         fi
     fi

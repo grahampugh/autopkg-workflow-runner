@@ -105,7 +105,7 @@ By default, the workflow will run with an `ubuntu-latest` runner. If the recipe(
 When you specify the platform, it is added to the dispatch file as follows:
 
 ```bash
-./create-dispatch-payload.sh --input autopkg-keys.json --output dispatch-payload.json --platform macos-latest
+./create-dispatch-payload.sh --input autopkg-keys.json --output autopkg-keys-dispatch.json --platform macos-latest
 ```
 
 This creates a `dispatch-payload.json` file ready to POST to GitHub:
@@ -120,13 +120,12 @@ This creates a `dispatch-payload.json` file ready to POST to GitHub:
 }
 ```
 
-
 ### 5. Trigger the Workflow
 
 Run the same file with the `--dispatch` option, also supplying your Personal Access Token:
 
 ```bash
-./create-dispatch-payload.sh --input autopkg-keys.json --output dispatch-payload.json --dispatch --token github_pat_1122334455667788990
+./create-dispatch-payload.sh --input autopkg-keys.json --output autopkg-keys-dispatch.json --dispatch --token github_pat_1122334455667788990
 ```
 
 Remember to specify the platform if not `ubuntu-latest`.

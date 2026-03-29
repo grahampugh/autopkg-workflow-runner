@@ -34,9 +34,64 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install uv on Ubuntu
+      - name: Set up AutoPkg on Ubuntu
         if: runner.os == 'Linux'
-        uses: astral-sh/setup-uv@v7
+        run: |
+          # Install system dependencies
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            git jq curl wget \
+            libcairo2-dev libmagic-dev \
+            p7zip-full msitools
+          
+          # Install uv for fast Python package installation
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          source $HOME/.cargo/env
+          
+          # Clone AutoPkg
+          git clone https://github.com/autopkg/autopkg.git ../autopkg
+          
+          # Create virtual environment with Python 3.10
+          uv venv --python 3.10 ../autopkg/.venv
+          
+          # Install minimal runtime dependencies for AutoPkg
+          uv pip install --python ../autopkg/.venv/bin/python3 \
+            pyyaml certifi xattr appdirs
+          
+          # Fix oscrypto issue with new OpenSSL
+          uv pip install --python ../autopkg/.venv/bin/python3 \
+            git+https://github.com/wbond/oscrypto.git
+          
+          # Create AutoPkg config directories
+          mkdir -p ~/Library/AutoPkg ~/.config/Autopkg
+          echo {} > ~/.config/Autopkg/config.json
+          
+          # Verify AutoPkg works
+          ./../autopkg/.venv/bin/python3 ../autopkg/Code/autopkg version
+          
+          echo "AutoPkg installation complete"
+
+      - name: Set up AutoPkg on macOS
+        if: runner.os == 'macOS'
+        run: |
+          # Download latest AutoPkg release
+          AUTOPKG_PKG=$(curl -sL -H "Accept: application/json" \
+            "https://api.github.com/repos/autopkg/autopkg/releases/latest" | \
+            awk -F '"' '/browser_download_url/ { print $4; exit }')
+          
+          curl -L "${AUTOPKG_PKG}" -o "/tmp/autopkg-latest.pkg"
+          
+          # Install AutoPkg
+          sudo installer -pkg /tmp/autopkg-latest.pkg -target /
+          
+          # Create config directories
+          mkdir -p ~/Library/AutoPkg ~/.config/Autopkg
+          echo {} > ~/.config/Autopkg/config.json
+          
+          # Verify installation
+          autopkg version
+          
+          echo "AutoPkg installation complete"
 
       - name: Decode and save JSON payload
         if: github.event.client_payload.data != '' || inputs.data != ''
@@ -80,11 +135,6 @@ jobs:
 
           echo "Masking complete"
           echo "Decoded JSON payload saved to /tmp/autopkg-keys.json"
-
-      - name: Set up AutoPkg
-        run: |
-          chmod +x setup.sh
-          ./setup.sh
 
       - name: Set up JamfUploader
         env:
