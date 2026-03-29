@@ -56,7 +56,7 @@ jobs:
           
           # Install minimal runtime dependencies for AutoPkg
           uv pip install --python ../autopkg/.venv/bin/python3 \
-            pyyaml certifi xattr appdirs
+            pyyaml certifi xattr appdirs lxml
           
           # Fix oscrypto issue with new OpenSSL
           uv pip install --python ../autopkg/.venv/bin/python3 \
