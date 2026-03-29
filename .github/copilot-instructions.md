@@ -131,10 +131,7 @@ The workflow immediately masks sensitive values using `echo "::add-mask::<value>
 ### Manual Testing
 
 ```bash
-# Setup AutoPkg (run once)
-./setup.sh
-
-# Configure JamfUploader
+# Configure JamfUploader (AutoPkg must be installed first)
 ./setup-jamfuploader.sh \
   --jss-url "https://your.jamf.instance.com" \
   --jss-user "apiuser" \
